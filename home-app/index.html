@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="Home — Your personal life management app. Track tasks, expenses, messages, habits, and reminders.">
+    <meta name="theme-color" id="metaThemeColor" content="#0a0e1a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <title>Home — Life Manager</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- PIN Lock Screen -->
+    <div id="lockScreen" class="lock-screen">
+        <div class="lock-content">
+            <div class="lock-icon">
+                <span class="material-icons-round">lock</span>
+            </div>
+            <h2 class="lock-title">Home</h2>
+            <p class="lock-subtitle" id="lockSubtitle">Enter your PIN to unlock</p>
+            <div class="pin-dots" id="pinDots">
+                <span class="pin-dot"></span>
+                <span class="pin-dot"></span>
+                <span class="pin-dot"></span>
+                <span class="pin-dot"></span>
+            </div>
+            <div class="pin-pad">
+                <button class="pin-key" data-key="1">1</button>
+                <button class="pin-key" data-key="2">2</button>
+                <button class="pin-key" data-key="3">3</button>
+                <button class="pin-key" data-key="4">4</button>
+                <button class="pin-key" data-key="5">5</button>
+                <button class="pin-key" data-key="6">6</button>
+                <button class="pin-key" data-key="7">7</button>
+                <button class="pin-key" data-key="8">8</button>
+                <button class="pin-key" data-key="9">9</button>
+                <button class="pin-key pin-key-empty"></button>
+                <button class="pin-key" data-key="0">0</button>
+                <button class="pin-key pin-key-action" id="pinBackspace">
+                    <span class="material-icons-round">backspace</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span class="toast-icon material-icons-round" id="toastIcon">info</span>
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- App Container -->
+    <div id="appContainer" class="app-container hidden">
+
+        <!-- Header -->
+        <header class="app-header" id="appHeader">
+            <div class="header-left">
+                <h1 class="header-title" id="headerTitle">Dashboard</h1>
+                <p class="header-date" id="headerDate"></p>
+            </div>
+            <div class="header-right">
+                <button class="header-btn" id="btnThemeToggle" title="Toggle Theme">
+                    <span class="material-icons-round" id="themeIcon">light_mode</span>
+                </button>
+                <button class="header-btn" id="btnCharts" title="Analytics">
+                    <span class="material-icons-round">bar_chart</span>
+                </button>
+                <button class="header-btn" id="btnLock" title="Lock App">
+                    <span class="material-icons-round">lock</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Pages -->
+        <main class="pages-container">
+
+            <!-- Dashboard Page -->
+            <section class="page active" id="pageDashboard">
+                <div class="page-content">
+                    <!-- Greeting Banner -->
+                    <div class="greeting-banner" id="greetingBanner">
+                        <div class="greeting-left">
+                            <span class="greeting-emoji" id="greetingEmoji">☀️</span>
+                            <div class="greeting-text">
+                                <h2 class="greeting-title" id="greetingTitle">Good Morning!</h2>
+                                <p class="greeting-quote" id="greetingQuote">Make today amazing.</p>
+                            </div>
+                        </div>
+                        <div class="greeting-streak" id="greetingStreak" title="App streak">
+                            <span class="material-icons-round">local_fire_department</span>
+                            <span id="streakCount">1</span>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="quick-actions-strip">
+                        <button class="quick-action-pill" onclick="QuickLog.quickExpense()">
+                            <span class="material-icons-round">payments</span>
+                            <span>Expense</span>
+                        </button>
+                        <button class="quick-action-pill" onclick="QuickLog.quickTask()">
+                            <span class="material-icons-round">add_task</span>
+                            <span>Task</span>
+                        </button>
+                        <button class="quick-action-pill" onclick="QuickLog.quickReminder()">
+                            <span class="material-icons-round">alarm_add</span>
+                            <span>Reminder</span>
+                        </button>
+                        <button class="quick-action-pill" onclick="QuickLog.quickNote()">
+                            <span class="material-icons-round">edit_note</span>
+                            <span>Note</span>
+                        </button>
+                    </div>
+
+                    <!-- Quick Expense Presets -->
+                    <div class="section-header">
+                        <h2>⚡ Quick Spend</h2>
+                        <button class="focus-add-header-btn" onclick="ExpensePresets.openManage()" title="Manage Presets">
+                            <span class="material-icons-round">settings</span>
+                        </button>
+                    </div>
+                    <div class="expense-presets-strip" id="expensePresetsStrip"></div>
+
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                        <h2 style="font-size:16px;font-weight:600">Overview</h2>
+                        <button class="header-btn" id="btnCustomizeDash" title="Customize Dashboard">
+                            <span class="material-icons-round">tune</span>
+                        </button>
+                    </div>
+                    <div class="summary-cards" id="summaryCards">
+                        <div class="summary-card card-tasks">
+                            <div class="card-icon"><span class="material-icons-round">task_alt</span></div>
+                            <div class="card-info">
+                                <span class="card-value" id="dashTasksDone">0</span>
+                                <span class="card-label">Completed</span>
+                            </div>
+                        </div>
+                        <div class="summary-card card-pending">
+                            <div class="card-icon"><span class="material-icons-round">pending_actions</span></div>
+                            <div class="card-info">
+                                <span class="card-value" id="dashTasksPending">0</span>
+                                <span class="card-label">Pending</span>
+                            </div>
+                        </div>
+                        <div class="summary-card card-messages">
+                            <div class="card-icon"><span class="material-icons-round">chat</span></div>
+                            <div class="card-info">
+                                <span class="card-value" id="dashMessages">0</span>
+                                <span class="card-label">Messages</span>
+                            </div>
+                        </div>
+                        <div class="summary-card card-expenses">
+                            <div class="card-icon"><span class="material-icons-round">account_balance_wallet</span></div>
+                            <div class="card-info">
+                                <span class="card-value" id="dashExpenses">₹0</span>
+                                <span class="card-label">Spent Today</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Summary Card -->
+                    <div class="weekly-summary-card" id="weeklySummaryCard"></div>
+
+                    <!-- Daily Focus Widget -->
+                    <div class="section-header">
+                        <h2>🎯 Today's Focus</h2>
+                        <button class="focus-add-header-btn" onclick="DailyFocus.openAdd()" title="Add Focus">
+                            <span class="material-icons-round">add_circle</span>
+                        </button>
+                    </div>
+                    <div id="dailyFocusWidget" class="daily-focus-widget"></div>
+
+                    <!-- Habits Quick View on Dashboard -->
+                    <div class="section-header">
+                        <h2>Today's Habits</h2>
+                    </div>
+                    <div id="dashHabitsQuick" class="dash-habits-quick"></div>
+
+                    <div class="section-header">
+                        <h2>Recent Activity</h2>
+                    </div>
+                    <div class="activity-list" id="activityList">
+                        <div class="empty-state">
+                            <span class="material-icons-round">history</span>
+                            <p>No activity yet. Start adding tasks, messages, or expenses!</p>
+                        </div>
+                    </div>
+
+                    <div class="section-header">
+                        <h2>Quick Overview</h2>
+                    </div>
+                    <div class="quick-chart-container">
+                        <canvas id="dashExpenseChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tasks Page -->
+            <section class="page" id="pageTasks">
+                <div class="page-content">
+                    <div class="filter-bar">
+                        <input type="date" class="filter-date" id="taskFilterDate">
+                        <select class="filter-select" id="taskFilterStatus">
+                            <option value="all">All Status</option>
+                            <option value="completed">Completed</option>
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                        </select>
+                    </div>
+                    <div class="daily-notes-section">
+                        <textarea id="dailyNotes" class="daily-notes" placeholder="Write your daily notes here..."></textarea>
+                        <button class="btn-save-notes" id="btnSaveNotes">
+                            <span class="material-icons-round">save</span> Save Notes
+                        </button>
+                    </div>
+                    <div class="items-list" id="tasksList">
+                        <div class="empty-state">
+                            <span class="material-icons-round">checklist</span>
+                            <p>No tasks yet. Tap + to add your first task!</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="fab" id="fabAddTask">
+                    <span class="material-icons-round">add</span>
+                </button>
+            </section>
+
+            <!-- Calendar Page -->
+            <section class="page" id="pageCalendar">
+                <div class="page-content">
+                    <div class="calendar-container">
+                        <div class="cal-header">
+                            <button class="cal-nav-btn" id="calPrev">
+                                <span class="material-icons-round">chevron_left</span>
+                            </button>
+                            <h3 class="cal-month-title" id="calMonthTitle">March 2026</h3>
+                            <button class="cal-nav-btn" id="calNext">
+                                <span class="material-icons-round">chevron_right</span>
+                            </button>
+                        </div>
+                        <div id="calendarGrid" class="calendar-grid"></div>
+                    </div>
+                    <div class="cal-legend">
+                        <span><span class="cal-dot dot-task"></span> Tasks</span>
+                        <span><span class="cal-dot dot-expense"></span> Expenses</span>
+                        <span><span class="cal-dot dot-reminder"></span> Reminders</span>
+                        <span><span class="cal-dot dot-habit"></span> Habits</span>
+                    </div>
+                    <div id="calDayDetail" class="cal-day-detail"></div>
+                </div>
+            </section>
+
+            <!-- Expenses Page -->
+            <section class="page" id="pageExpenses">
+                <div class="page-content">
+                    <div class="filter-bar">
+                        <input type="date" class="filter-date" id="expFilterDate">
+                        <select class="filter-select" id="expFilterCat">
+                            <option value="all">All Categories</option>
+                            <option value="Food">🍔 Food</option>
+                            <option value="Travel">🚗 Travel</option>
+                            <option value="Shopping">🛍️ Shopping</option>
+                            <option value="Bills">📄 Bills</option>
+                            <option value="Health">💊 Health</option>
+                            <option value="Entertainment">🎮 Entertainment</option>
+                            <option value="Other">📦 Other</option>
+                        </select>
+                    </div>
+                    <div class="expense-total-bar" id="expTotalBar">
+                        <div class="exp-total-info">
+                            <span class="exp-total-label">Today's Total</span>
+                            <span class="exp-total-value" id="expDayTotal">₹0</span>
+                        </div>
+                        <div class="exp-total-info">
+                            <span class="exp-total-label">This Month</span>
+                            <span class="exp-total-value" id="expMonthTotal">₹0</span>
+                        </div>
+                    </div>
+                    <div class="items-list" id="expensesList">
+                        <div class="empty-state">
+                            <span class="material-icons-round">receipt_long</span>
+                            <p>No expenses logged. Tap + to record spending!</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="fab" id="fabAddExp">
+                    <span class="material-icons-round">add</span>
+                </button>
+            </section>
+
+            <!-- More Page -->
+            <section class="page" id="pageMore">
+                <div class="page-content">
+                    <div class="more-grid">
+                        <button class="more-card" data-goto="pageSplitter">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #f59e0b, #ef4444)"><span class="material-icons-round">call_split</span></div>
+                            <span class="more-card-label">Splitter</span>
+                        </button>
+                        <button class="more-card" data-goto="pageMoodTrends">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #a855f7, #ec4899)"><span class="material-icons-round">mood</span></div>
+                            <span class="more-card-label">Mood</span>
+                        </button>
+                        <button class="more-card" data-goto="pageHabits">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #ef4444, #f97316)"><span class="material-icons-round">fitness_center</span></div>
+                            <span class="more-card-label">Habits</span>
+                        </button>
+                        <button class="more-card" data-goto="pageReminders">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #f59e0b, #f97316)"><span class="material-icons-round">notifications_active</span></div>
+                            <span class="more-card-label">Reminders</span>
+                        </button>
+                        <button class="more-card" data-goto="pageMessages">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #a855f7, #6366f1)"><span class="material-icons-round">chat</span></div>
+                            <span class="more-card-label">Messages</span>
+                        </button>
+                        <button class="more-card" data-goto="pageKanban">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #0ea5e9, #3b82f6)"><span class="material-icons-round">view_kanban</span></div>
+                            <span class="more-card-label">Kanban</span>
+                        </button>
+                        <button class="more-card" data-goto="pageInsights">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #f43f5e, #f97316)"><span class="material-icons-round">insights</span></div>
+                            <span class="more-card-label">Insights</span>
+                        </button>
+                        <button class="more-card" data-goto="pageWeeklyPlanner">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #8b5cf6, #3b82f6)"><span class="material-icons-round">view_week</span></div>
+                            <span class="more-card-label">Planner</span>
+                        </button>
+                        <button class="more-card" data-goto="pageSavings">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #22c55e, #06b6d4)"><span class="material-icons-round">savings</span></div>
+                            <span class="more-card-label">Savings</span>
+                        </button>
+                        <button class="more-card" data-goto="pageNotes">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #ec4899, #a855f7)"><span class="material-icons-round">edit_note</span></div>
+                            <span class="more-card-label">Journal</span>
+                        </button>
+                        <button class="more-card" data-goto="pageGoals">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #14b8a6, #06b6d4)"><span class="material-icons-round">flag</span></div>
+                            <span class="more-card-label">Goals</span>
+                        </button>
+                        <button class="more-card" data-goto="pagePomodoro">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #f43f5e, #e11d48)"><span class="material-icons-round">timer</span></div>
+                            <span class="more-card-label">Pomodoro</span>
+                        </button>
+                        <button class="more-card" data-goto="pageWishlist">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #f59e0b, #eab308)"><span class="material-icons-round">bookmark</span></div>
+                            <span class="more-card-label">Wishlist</span>
+                        </button>
+                        <button class="more-card" data-goto="pageIncome">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #22c55e, #10b981)"><span class="material-icons-round">account_balance</span></div>
+                            <span class="more-card-label">Income</span>
+                        </button>
+                        <button class="more-card" data-goto="pageContacts">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #3b82f6, #6366f1)"><span class="material-icons-round">people</span></div>
+                            <span class="more-card-label">Contacts</span>
+                        </button>
+                        <button class="more-card" data-goto="pageLearning">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #8b5cf6, #a855f7)"><span class="material-icons-round">school</span></div>
+                            <span class="more-card-label">Learning</span>
+                        </button>
+                        <button class="more-card" data-goto="pageHealth">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #06b6d4, #0ea5e9)"><span class="material-icons-round">favorite</span></div>
+                            <span class="more-card-label">Health</span>
+                        </button>
+                        <button class="more-card" data-goto="pageBudget">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #f43f5e, #ec4899)"><span class="material-icons-round">account_balance_wallet</span></div>
+                            <span class="more-card-label">Budget</span>
+                        </button>
+                        <button class="more-card" data-goto="pageRecurring">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #06b6d4, #3b82f6)"><span class="material-icons-round">repeat</span></div>
+                            <span class="more-card-label">Recurring</span>
+                        </button>
+                        <button class="more-card" data-goto="pageReports">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #10b981, #14b8a6)"><span class="material-icons-round">assessment</span></div>
+                            <span class="more-card-label">Reports</span>
+                        </button>
+                        <button class="more-card" data-goto="pageSettings">
+                            <div class="more-card-icon" style="background: linear-gradient(135deg, #64748b, #475569)"><span class="material-icons-round">settings</span></div>
+                            <span class="more-card-label">Settings</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Habits Page (sub-page from More) -->
+            <section class="page" id="pageHabits">
+                <div class="page-content">
+                    <div id="habitsList"></div>
+                </div>
+                <button class="fab" id="fabAddHabit">
+                    <span class="material-icons-round">add</span>
+                </button>
+            </section>
+
+            <!-- Messages Page -->
+            <section class="page" id="pageMessages">
+                <div class="page-content">
+                    <div class="filter-bar">
+                        <input type="date" class="filter-date" id="msgFilterDate">
+                    </div>
+                    <div class="msg-summary-bar" id="msgSummaryBar">
+                        <span class="material-icons-round">analytics</span>
+                        <span id="msgDayCount">0 messages sent today</span>
+                    </div>
+                    <div class="items-list" id="messagesList">
+                        <div class="empty-state">
+                            <span class="material-icons-round">message</span>
+                            <p>No messages logged. Tap + to track a message!</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="fab" id="fabAddMsg">
+                    <span class="material-icons-round">add</span>
+                </button>
+            </section>
+
+            <!-- Reminders Page -->
+            <section class="page" id="pageReminders">
+                <div class="page-content">
+                    <div class="filter-bar">
+                        <select class="filter-select" id="remFilterStatus">
+                            <option value="all">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="completed">Completed</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+                    <div class="items-list" id="remindersList">
+                        <div class="empty-state">
+                            <span class="material-icons-round">event_note</span>
+                            <p>No reminders set. Tap + to plan ahead!</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="fab" id="fabAddReminder">
+                    <span class="material-icons-round">add</span>
+                </button>
+            </section>
+
+            <!-- Settings Page -->
+            <section class="page" id="pageSettings">
+                <div class="page-content">
+                    <div class="settings-section">
+                        <h3 class="settings-title">
+                            <span class="material-icons-round">palette</span> Theme Presets
+                        </h3>
+                        <div id="themePresetGrid" class="theme-preset-grid"></div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-title">
+                            <span class="material-icons-round">colorize</span> Accent Color
+                        </h3>
+                        <div id="accentColorGrid" class="accent-color-grid"></div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-title">
+                            <span class="material-icons-round">label</span> Tags Manager
+                        </h3>
+                        <div class="tag-add-row">
+                            <input type="text" id="tagNameInput" placeholder="New tag name..." class="tag-name-input">
+                            <button class="btn-primary" id="btnAddTag" style="padding:10px 16px;font-size:13px">Add</button>
+                        </div>
+                        <div id="tagManagerList"></div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-title">
+                            <span class="material-icons-round">notifications</span> Notification Preferences
+                        </h3>
+                        <div class="notif-toggles">
+                            <label class="notif-toggle-row"><input type="checkbox" id="notifReminders" checked> <span>Overdue Reminders</span></label>
+                            <label class="notif-toggle-row"><input type="checkbox" id="notifHabits" checked> <span>Unchecked Habits (after 6 PM)</span></label>
+                            <label class="notif-toggle-row"><input type="checkbox" id="notifBudget" checked> <span>Over-Budget Alerts</span></label>
+                            <label class="notif-toggle-row"><input type="checkbox" id="notifTasks" checked> <span>Pending Tasks Today</span></label>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-title">
+                            <span class="material-icons-round">cloud</span> Cloud Sync
+                        </h3>
+                        <div id="cloudSyncStatus" class="cloud-sync-status"></div>
+                        <label class="notif-toggle-row" style="margin-top:8px"><input type="checkbox" id="cloudSyncToggle"> <span>Enable Cloud Sync</span></label>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-title">
+                            <span class="material-icons-round">storage</span> Data Overview
+                        </h3>
+                        <div id="storageStats" class="storage-stats"></div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-title">
+                            <span class="material-icons-round">cloud_download</span> Backup & Restore
+                        </h3>
+                        <p class="settings-desc">Export all your data as a JSON file. Import to restore.</p>
+                        <div class="settings-actions">
+                            <button class="settings-btn btn-export" id="btnExportData">
+                                <span class="material-icons-round">download</span>
+                                Export Backup
+                            </button>
+                            <button class="settings-btn btn-import" id="btnImportData">
+                                <span class="material-icons-round">upload</span>
+                                Import Backup
+                            </button>
+                            <input type="file" id="importFileInput" accept=".json" style="display:none">
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-title">
+                            <span class="material-icons-round">security</span> Security
+                        </h3>
+                        <button class="settings-btn btn-reset-pin" id="btnResetPin">
+                            <span class="material-icons-round">lock_reset</span>
+                            Reset PIN
+                        </button>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-title">
+                            <span class="material-icons-round">warning</span> Danger Zone
+                        </h3>
+                        <button class="settings-btn btn-clear-data" id="btnClearAllData">
+                            <span class="material-icons-round">delete_forever</span>
+                            Clear All Data
+                        </button>
+                    </div>
+
+                    <div class="settings-section app-info">
+                        <div class="app-info-logo">
+                            <span class="material-icons-round">home</span>
+                        </div>
+                        <h3>Home — Life Manager</h3>
+                        <p>Version 5.0</p>
+                        <p class="text-muted">Your personal, private, offline-first life dashboard.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Budget Page -->
+            <section class="page" id="pageBudget">
+                <div class="page-content">
+                    <div class="filter-bar"><input type="month" class="filter-date" id="budgetMonthFilter"></div>
+                    <div class="budget-overview-bar">
+                        <div class="budget-overview-info">
+                            <span class="budget-overview-label">Budget</span>
+                            <span class="budget-overview-value" id="budgetTotalLimit">₹0</span>
+                        </div>
+                        <div class="budget-overview-info">
+                            <span class="budget-overview-label">Spent</span>
+                            <span class="budget-overview-value" id="budgetTotalSpent">₹0</span>
+                        </div>
+                    </div>
+                    <div class="budget-overall-track"><div class="budget-overall-fill" id="budgetOverallBar"></div></div>
+                    <div class="items-list" id="budgetList"><div class="empty-state"><span class="material-icons-round">account_balance_wallet</span><p>No budget set. Tap + to plan!</p></div></div>
+                </div>
+                <button class="fab" id="fabSetBudget"><span class="material-icons-round">add</span></button>
+            </section>
+
+            <!-- Recurring Page -->
+            <section class="page" id="pageRecurring">
+                <div class="page-content">
+                    <div class="items-list" id="recurringList"><div class="empty-state"><span class="material-icons-round">repeat</span><p>No recurring items. Tap + to automate!</p></div></div>
+                </div>
+                <button class="fab" id="fabAddRecurring"><span class="material-icons-round">add</span></button>
+            </section>
+
+            <!-- Reports Page -->
+            <section class="page" id="pageReports">
+                <div class="page-content">
+                    <div class="filter-bar" style="justify-content:space-between;align-items:center">
+                        <select class="filter-select" id="reportPeriod">
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                            <option value="lastmonth">Last Month</option>
+                        </select>
+                        <span class="report-range-label" id="reportRangeLabel"></span>
+                    </div>
+                    <div id="reportsContent"></div>
+                </div>
+            </section>
+
+            <!-- Notes/Journal Page -->
+            <section class="page" id="pageNotes">
+                <div class="page-content">
+                    <div class="filter-bar"><input type="date" class="filter-date" id="noteFilterDate"></div>
+                    <div class="items-list" id="notesList"><div class="empty-state"><span class="material-icons-round">edit_note</span><p>No journal entries yet. Tap + to write!</p></div></div>
+                </div>
+                <button class="fab" id="fabAddNote"><span class="material-icons-round">add</span></button>
+            </section>
+
+            <!-- Goals Page -->
+            <section class="page" id="pageGoals">
+                <div class="page-content">
+                    <div class="filter-bar">
+                        <select class="filter-select" id="goalFilterStatus"><option value="all">All</option><option value="active">Active</option><option value="completed">Completed</option><option value="paused">Paused</option></select>
+                    </div>
+                    <div class="items-list" id="goalsList"><div class="empty-state"><span class="material-icons-round">flag</span><p>No goals set. Tap + to dream big!</p></div></div>
+                </div>
+                <button class="fab" id="fabAddGoal"><span class="material-icons-round">add</span></button>
+            </section>
+
+            <!-- Pomodoro Page -->
+            <section class="page" id="pagePomodoro">
+                <div class="page-content">
+                    <div class="pomodoro-container">
+                        <p class="pomodoro-mode" id="pomodoroMode">🔥 Focus Time</p>
+                        <div class="pomodoro-ring-wrap">
+                            <svg class="pomodoro-svg" viewBox="0 0 260 260">
+                                <circle cx="130" cy="130" r="120" fill="none" stroke="var(--bg-glass-strong)" stroke-width="8"/>
+                                <circle id="pomodoroRing" cx="130" cy="130" r="120" fill="none" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" transform="rotate(-90 130 130)"/>
+                            </svg>
+                            <span class="pomodoro-time" id="pomodoroTime">25:00</span>
+                        </div>
+                        <p class="pomodoro-sessions" id="pomodoroSessions">0 sessions today</p>
+                        <div class="pomodoro-controls">
+                            <button class="pomo-btn" id="btnPomodoroReset" title="Reset"><span class="material-icons-round">refresh</span></button>
+                            <button class="pomo-btn pomo-btn-main" id="btnPomodoroStart"><span class="material-icons-round">play_arrow</span></button>
+                            <button class="pomo-btn" id="btnPomodoroSwitch" title="Switch"><span class="material-icons-round">swap_horiz</span></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Wishlist Page -->
+            <section class="page" id="pageWishlist">
+                <div class="page-content">
+                    <div class="filter-bar">
+                        <select class="filter-select" id="wishFilterStatus"><option value="all">All</option><option value="want">Want</option><option value="bought">Bought</option><option value="done">Done</option></select>
+                    </div>
+                    <div class="expense-total-bar">
+                        <div class="exp-total-info"><span class="exp-total-label">Want to Spend</span><span class="exp-total-value" id="wishEstTotal">₹0</span></div>
+                        <div class="exp-total-info"><span class="exp-total-label">Actually Spent</span><span class="exp-total-value" id="wishSpentTotal">₹0</span></div>
+                    </div>
+                    <div class="items-list" id="wishlistList"><div class="empty-state"><span class="material-icons-round">bookmark_border</span><p>Your wishlist is empty. Add your dreams!</p></div></div>
+                </div>
+                <button class="fab" id="fabAddWish"><span class="material-icons-round">add</span></button>
+            </section>
+
+            <!-- Income Page -->
+            <section class="page" id="pageIncome">
+                <div class="page-content">
+                    <div class="filter-bar"><input type="month" class="filter-date" id="incomeFilterMonth"></div>
+                    <div class="income-summary-bar">
+                        <div class="income-summary-item"><span class="income-summary-label">Income</span><span class="income-summary-value positive" id="incomeMonthTotal">₹0</span></div>
+                        <div class="income-summary-item"><span class="income-summary-label">Expenses</span><span class="income-summary-value negative" id="incomeMonthExpenses">₹0</span></div>
+                        <div class="income-summary-item"><span class="income-summary-label">Savings</span><span class="summary-value positive" id="incomeMonthSavings">₹0</span></div>
+                    </div>
+                    <div class="items-list" id="incomeList"><div class="empty-state"><span class="material-icons-round">account_balance</span><p>No income logged. Tap + to track earnings!</p></div></div>
+                </div>
+                <button class="fab" id="fabAddIncome"><span class="material-icons-round">add</span></button>
+            </section>
+
+            <!-- Contacts Page -->
+            <section class="page" id="pageContacts">
+                <div class="page-content">
+                    <div class="filter-bar">
+                        <select class="filter-select" id="contactFilterType"><option value="all">All</option><option value="Family">Family</option><option value="Friend">Friend</option><option value="Colleague">Colleague</option><option value="Client">Client</option><option value="Mentor">Mentor</option><option value="Other">Other</option></select>
+                    </div>
+                    <div class="items-list" id="contactsList"><div class="empty-state"><span class="material-icons-round">people</span><p>No contacts yet. Add your important people!</p></div></div>
+                </div>
+                <button class="fab" id="fabAddContact"><span class="material-icons-round">add</span></button>
+            </section>
+
+            <!-- Learning Page -->
+            <section class="page" id="pageLearning">
+                <div class="page-content">
+                    <div class="filter-bar">
+                        <select class="filter-select" id="learningFilterStatus"><option value="all">All</option><option value="planned">Planned</option><option value="in-progress">In Progress</option><option value="completed">Completed</option><option value="dropped">Dropped</option></select>
+                    </div>
+                    <div class="items-list" id="learningList"><div class="empty-state"><span class="material-icons-round">school</span><p>Nothing being tracked. Start learning!</p></div></div>
+                </div>
+                <button class="fab" id="fabAddLearning"><span class="material-icons-round">add</span></button>
+            </section>
+
+            <!-- Health Page -->
+            <section class="page" id="pageHealth">
+                <div class="page-content" id="healthContent">
+                    <div class="empty-state"><span class="material-icons-round">favorite</span><p>Loading health log...</p></div>
+                </div>
+            </section>
+
+            <!-- Insights Page -->
+            <section class="page" id="pageInsights">
+                <div class="page-content" id="insightsContent">
+                    <div class="empty-state"><span class="material-icons-round">insights</span><p>Loading insights...</p></div>
+                </div>
+            </section>
+
+            <!-- Kanban Page -->
+            <section class="page" id="pageKanban">
+                <div class="page-content">
+                    <div id="kanbanBoard" class="kanban-board"></div>
+                </div>
+            </section>
+
+            <!-- Weekly Planner Page -->
+            <section class="page" id="pageWeeklyPlanner">
+                <div class="page-content">
+                    <div id="weeklyPlannerContent"></div>
+                </div>
+            </section>
+
+            <!-- Savings Page -->
+            <section class="page" id="pageSavings">
+                <div class="page-content">
+                    <div id="savingsList"></div>
+                </div>
+                <button class="fab" id="fabAddSavings"><span class="material-icons-round">add</span></button>
+            </section>
+
+            <!-- Expense Splitter Page -->
+            <section class="page" id="pageSplitter">
+                <div class="page-content">
+                    <div id="splitterList"><div class="empty-state"><span class="material-icons-round">group</span><p>No split expenses. Tap + to split a bill!</p></div></div>
+                </div>
+                <button class="fab" id="fabAddSplitter"><span class="material-icons-round">add</span></button>
+            </section>
+
+            <!-- Mood Trends Page -->
+            <section class="page" id="pageMoodTrends">
+                <div class="page-content" id="moodTrendsContent">
+                    <div class="empty-state"><span class="material-icons-round">mood</span><p>Loading mood trends...</p></div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-page="pageDashboard">
+                <span class="material-icons-round">dashboard</span>
+                <span class="nav-label">Home</span>
+            </button>
+            <button class="nav-item" data-page="pageTasks">
+                <span class="material-icons-round">task_alt</span>
+                <span class="nav-label">Tasks</span>
+            </button>
+            <button class="nav-item" data-page="pageCalendar">
+                <span class="material-icons-round">calendar_month</span>
+                <span class="nav-label">Calendar</span>
+            </button>
+            <button class="nav-item" data-page="pageExpenses">
+                <span class="material-icons-round">wallet</span>
+                <span class="nav-label">Expenses</span>
+            </button>
+            <button class="nav-item" data-page="pageMore">
+                <span class="material-icons-round">more_horiz</span>
+                <span class="nav-label">More</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- Charts Modal -->
+    <div class="modal-overlay" id="chartsModal">
+        <div class="modal charts-modal">
+            <div class="modal-header">
+                <h2>Analytics</h2>
+                <button class="modal-close" id="closeChartsModal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="chart-section">
+                    <h3>Monthly Expenses</h3>
+                    <canvas id="monthlyExpensesChart"></canvas>
+                </div>
+                <div class="chart-section">
+                    <h3>Expense Categories</h3>
+                    <canvas id="categoryPieChart"></canvas>
+                </div>
+                <div class="chart-section">
+                    <h3>Weekly Productivity</h3>
+                    <canvas id="weeklyProductivityChart"></canvas>
+                </div>
+                <div class="chart-section">
+                    <h3>Daily Messages</h3>
+                    <canvas id="dailyMessagesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Task Modal -->
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="taskModalTitle">Add Task</h2>
+                <button class="modal-close" data-close="taskModal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Task Title</label>
+                    <input type="text" id="taskTitle" placeholder="What needs to be done?">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="taskDesc" placeholder="Add details..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="taskStatus">
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="taskDate">
+                </div>
+                <input type="hidden" id="taskEditId">
+                <button class="btn-primary" id="btnSaveTask">Save Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Message Modal -->
+    <div class="modal-overlay" id="msgModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="msgModalTitle">Log Message</h2>
+                <button class="modal-close" data-close="msgModal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Recipient</label>
+                    <input type="text" id="msgRecipient" placeholder="Who did you message?">
+                </div>
+                <div class="form-group">
+                    <label>Purpose</label>
+                    <input type="text" id="msgPurpose" placeholder="Reason for messaging">
+                </div>
+                <div class="form-group">
+                    <label>Number of Messages</label>
+                    <input type="number" id="msgCount" placeholder="1" min="1" value="1">
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="msgDate">
+                </div>
+                <input type="hidden" id="msgEditId">
+                <button class="btn-primary" id="btnSaveMsg">Save Message</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Expense Modal -->
+    <div class="modal-overlay" id="expModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="expModalTitle">Add Expense</h2>
+                <button class="modal-close" data-close="expModal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Amount (₹)</label>
+                    <input type="number" id="expAmount" placeholder="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="expCategory">
+                        <option value="Food">🍔 Food</option>
+                        <option value="Travel">🚗 Travel</option>
+                        <option value="Shopping">🛍️ Shopping</option>
+                        <option value="Bills">📄 Bills</option>
+                        <option value="Health">💊 Health</option>
+                        <option value="Entertainment">🎮 Entertainment</option>
+                        <option value="Other">📦 Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="expDate">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="expNotes" placeholder="What was this for?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>📸 Receipt</label>
+                    <div class="receipt-capture-row">
+                        <button type="button" class="btn-secondary" id="btnCaptureReceipt" style="padding:10px 16px;font-size:13px">
+                            <span class="material-icons-round" style="font-size:18px">photo_camera</span> Capture Receipt
+                        </button>
+                        <input type="file" id="receiptFileInput" accept="image/*" capture="environment" style="display:none">
+                    </div>
+                    <div id="receiptPreview" style="display:none"></div>
+                </div>
+                <input type="hidden" id="expEditId">
+                <button class="btn-primary" id="btnSaveExp">Save Expense</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Reminder Modal -->
+    <div class="modal-overlay" id="reminderModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="reminderModalTitle">Add Reminder</h2>
+                <button class="modal-close" data-close="reminderModal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="reminderTitle" placeholder="What do you need to do?">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="reminderDesc" placeholder="Add details..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Deadline</label>
+                    <input type="date" id="reminderDeadline">
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select id="reminderPriority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>📍 Location</label>
+                    <div style="display:flex;gap:8px">
+                        <select id="reminderLocation" class="filter-select" style="flex:1"><option value="">No location</option></select>
+                        <button type="button" class="btn-secondary" onclick="Location.captureCurrentLocation('reminderLocationName')" style="padding:8px 12px;font-size:12px"><span class="material-icons-round" style="font-size:16px">my_location</span></button>
+                    </div>
+                    <input type="text" id="reminderLocationName" placeholder="Location name (e.g. Office)" style="margin-top:6px">
+                </div>
+                <input type="hidden" id="reminderEditId">
+                <button class="btn-primary" id="btnSaveReminder">Save Reminder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Habit Modal -->
+    <div class="modal-overlay" id="habitModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Add Habit</h2>
+                <button class="modal-close" data-close="habitModal">
+                    <span class="material-icons-round">close</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Habit Name</label>
+                    <input type="text" id="habitName" placeholder="e.g. Drink Water">
+                </div>
+                <div class="form-group">
+                    <label>Icon</label>
+                    <select id="habitIcon">
+                        <option value="fitness_center">💪 Exercise</option>
+                        <option value="menu_book">📖 Reading</option>
+                        <option value="water_drop">💧 Water</option>
+                        <option value="self_improvement">🧘 Meditation</option>
+                        <option value="no_meals">🚫 No Junk</option>
+                        <option value="directions_run">🏃 Running</option>
+                        <option value="bedtime">😴 Sleep Early</option>
+                        <option value="code">💻 Coding</option>
+                        <option value="music_note">🎵 Music</option>
+                        <option value="brush">🎨 Art</option>
+                        <option value="check_circle">✅ Generic</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <div class="color-picker-row">
+                        <label class="color-option"><input type="radio" name="habitColorRadio" value="#ef4444" checked><span style="background:#ef4444"></span></label>
+                        <label class="color-option"><input type="radio" name="habitColorRadio" value="#f97316"><span style="background:#f97316"></span></label>
+                        <label class="color-option"><input type="radio" name="habitColorRadio" value="#f59e0b"><span style="background:#f59e0b"></span></label>
+                        <label class="color-option"><input type="radio" name="habitColorRadio" value="#10b981"><span style="background:#10b981"></span></label>
+                        <label class="color-option"><input type="radio" name="habitColorRadio" value="#06b6d4"><span style="background:#06b6d4"></span></label>
+                        <label class="color-option"><input type="radio" name="habitColorRadio" value="#3b82f6"><span style="background:#3b82f6"></span></label>
+                        <label class="color-option"><input type="radio" name="habitColorRadio" value="#a855f7"><span style="background:#a855f7"></span></label>
+                        <label class="color-option"><input type="radio" name="habitColorRadio" value="#ec4899"><span style="background:#ec4899"></span></label>
+                    </div>
+                    <input type="hidden" id="habitColor" value="#ef4444">
+                </div>
+                <button class="btn-primary" id="btnSaveHabit">Save Habit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div class="modal-overlay" id="noteModal">
+        <div class="modal">
+            <div class="modal-header"><h2 id="noteModalTitle">New Journal Entry</h2><button class="modal-close" data-close="noteModal"><span class="material-icons-round">close</span></button></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Title</label><input type="text" id="noteTitle" placeholder="Entry title"></div>
+                <div class="form-group"><label>Mood</label><select id="noteMood"><option value="😊">😊 Happy</option><option value="😐">😐 Neutral</option><option value="😢">😢 Sad</option><option value="😤">😤 Angry</option><option value="🤩">🤩 Excited</option><option value="😴">😴 Tired</option><option value="🤔">🤔 Thoughtful</option><option value="💪">💪 Motivated</option></select></div>
+                <div class="form-group"><label>Content</label><textarea id="noteContent" placeholder="Write your thoughts..." rows="5"></textarea></div>
+                <div class="form-group">
+                    <label>🎙️ Voice Note</label>
+                    <div class="voice-record-row">
+                        <button type="button" class="voice-rec-btn" id="btnVoiceRecord"><span class="material-icons-round">mic</span></button>
+                        <div class="voice-rec-indicator" id="voiceRecIndicator" style="display:none">
+                            <span class="voice-rec-dot"></span>
+                            <span id="voiceTimer">0:00</span>
+                        </div>
+                    </div>
+                    <div class="voice-preview" id="voicePreview" style="display:none"></div>
+                    <input type="hidden" id="voiceAudioData">
+                </div>
+                <div class="form-group"><label>Date</label><input type="date" id="noteDate"></div>
+                <input type="hidden" id="noteEditId">
+                <button class="btn-primary" id="btnSaveNote">Save Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Goal Modal -->
+    <div class="modal-overlay" id="goalModal">
+        <div class="modal">
+            <div class="modal-header"><h2 id="goalModalTitle">New Goal</h2><button class="modal-close" data-close="goalModal"><span class="material-icons-round">close</span></button></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Goal Title</label><input type="text" id="goalTitle" placeholder="What's your goal?"></div>
+                <div class="form-group"><label>Description</label><textarea id="goalDesc" placeholder="Describe your goal..."></textarea></div>
+                <div class="form-group"><label>Target Date</label><input type="date" id="goalTargetDate"></div>
+                <div class="form-group"><label>Status</label><select id="goalStatus"><option value="active">Active</option><option value="completed">Completed</option><option value="paused">Paused</option></select></div>
+                <div class="form-group"><label>Milestones (one per line)</label><textarea id="goalMilestones" placeholder="Step 1&#10;Step 2&#10;Step 3" rows="4"></textarea></div>
+                <input type="hidden" id="goalEditId">
+                <button class="btn-primary" id="btnSaveGoal">Save Goal</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wishlist Modal -->
+    <div class="modal-overlay" id="wishModal">
+        <div class="modal">
+            <div class="modal-header"><h2 id="wishModalTitle">Add to Wishlist</h2><button class="modal-close" data-close="wishModal"><span class="material-icons-round">close</span></button></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Item Name</label><input type="text" id="wishName" placeholder="What do you want?"></div>
+                <div class="form-group"><label>Estimated Cost (₹)</label><input type="number" id="wishCost" placeholder="0" min="0"></div>
+                <div class="form-group"><label>Category</label><select id="wishCategory"><option>🛒 Shopping</option><option>✈️ Travel</option><option>📱 Tech</option><option>📚 Books</option><option>🎮 Gaming</option><option>🏠 Home</option><option>🎯 Experience</option><option>📦 Other</option></select></div>
+                <div class="form-group"><label>Priority</label><select id="wishPriority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+                <div class="form-group"><label>Status</label><select id="wishStatus"><option value="want">Want</option><option value="bought">Bought</option><option value="done">Done</option></select></div>
+                <div class="form-group"><label>Notes</label><textarea id="wishNotes" placeholder="Details..."></textarea></div>
+                <input type="hidden" id="wishEditId">
+                <button class="btn-primary" id="btnSaveWish">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Income Modal -->
+    <div class="modal-overlay" id="incomeModal">
+        <div class="modal">
+            <div class="modal-header"><h2 id="incomeModalTitle">Add Income</h2><button class="modal-close" data-close="incomeModal"><span class="material-icons-round">close</span></button></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Source</label><input type="text" id="incomeSource" placeholder="Salary, Freelance, etc."></div>
+                <div class="form-group"><label>Amount (₹)</label><input type="number" id="incomeAmount" placeholder="0" min="0"></div>
+                <div class="form-group"><label>Category</label><select id="incomeCategory"><option>Salary</option><option>Freelance</option><option>Business</option><option>Investment</option><option>Gift</option><option>Refund</option><option>Other</option></select></div>
+                <div class="form-group"><label>Date</label><input type="date" id="incomeDate"></div>
+                <div class="form-group"><label>Notes</label><textarea id="incomeNotes" placeholder="Optional notes..."></textarea></div>
+                <input type="hidden" id="incomeEditId">
+                <button class="btn-primary" id="btnSaveIncome">Save Income</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal">
+            <div class="modal-header"><h2 id="contactModalTitle">Add Contact</h2><button class="modal-close" data-close="contactModal"><span class="material-icons-round">close</span></button></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Name</label><input type="text" id="contactName" placeholder="Full name"></div>
+                <div class="form-group"><label>Phone</label><input type="tel" id="contactPhone" placeholder="+91..."></div>
+                <div class="form-group"><label>Email</label><input type="email" id="contactEmail" placeholder="email@example.com"></div>
+                <div class="form-group"><label>Relationship</label><select id="contactRelationship"><option>Family</option><option>Friend</option><option>Colleague</option><option>Client</option><option>Mentor</option><option>Other</option></select></div>
+                <div class="form-group"><label>Last Contacted</label><input type="date" id="contactLastContacted"></div>
+                <div class="form-group"><label>Notes</label><textarea id="contactNotes" placeholder="Notes about this person..."></textarea></div>
+                <input type="hidden" id="contactEditId">
+                <button class="btn-primary" id="btnSaveContact">Save Contact</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning Modal -->
+    <div class="modal-overlay" id="learningModal">
+        <div class="modal">
+            <div class="modal-header"><h2 id="learningModalTitle">Add Learning</h2><button class="modal-close" data-close="learningModal"><span class="material-icons-round">close</span></button></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Title</label><input type="text" id="learningTitle" placeholder="Course / Book name"></div>
+                <div class="form-group"><label>Type</label><select id="learningType"><option>📚 Book</option><option>🎓 Course</option><option>💻 Skill</option><option>🎧 Podcast</option><option>📹 Video Series</option></select></div>
+                <div class="form-group"><label>Status</label><select id="learningStatus"><option value="planned">Planned</option><option value="in-progress">In Progress</option><option value="completed">Completed</option><option value="dropped">Dropped</option></select></div>
+                <div class="form-group"><label>Progress (%)</label><input type="number" id="learningProgress" min="0" max="100" value="0"></div>
+                <div class="form-group"><label>Notes</label><textarea id="learningNotes" placeholder="What did you learn?"></textarea></div>
+                <input type="hidden" id="learningEditId">
+                <button class="btn-primary" id="btnSaveLearning">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Modal -->
+    <div class="modal-overlay" id="budgetModal">
+        <div class="modal">
+            <div class="modal-header"><h2>Set Budget — <span id="budgetMonthLabel"></span></h2><button class="modal-close" data-close="budgetModal"><span class="material-icons-round">close</span></button></div>
+            <div class="modal-body">
+                <div id="budgetCategoryInputs"></div>
+                <button class="btn-primary" id="btnSaveBudget">Save Budget</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recurring Modal -->
+    <div class="modal-overlay" id="recurringModal">
+        <div class="modal">
+            <div class="modal-header"><h2 id="recurringModalTitle">New Recurring Item</h2><button class="modal-close" data-close="recurringModal"><span class="material-icons-round">close</span></button></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Type</label><select id="recurringType"><option value="task">📋 Task</option><option value="expense">💰 Expense</option></select></div>
+                <div class="form-group"><label>Title</label><input type="text" id="recurringTitle" placeholder="Item title"></div>
+                <div class="form-group"><label>Frequency</label><select id="recurringFrequency"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select></div>
+                <div id="recurringExpenseFields" style="display:none">
+                    <div class="form-group"><label>Category</label><select id="recurringCategory"><option value="Food">🍔 Food</option><option value="Travel">🚗 Travel</option><option value="Shopping">🛍️ Shopping</option><option value="Bills">📄 Bills</option><option value="Health">💊 Health</option><option value="Entertainment">🎮 Entertainment</option><option value="Other">📦 Other</option></select></div>
+                    <div class="form-group"><label>Amount (₹)</label><input type="number" id="recurringAmount" placeholder="0" min="0"></div>
+                </div>
+                <div class="form-group"><label>Start Date</label><input type="date" id="recurringStartDate"></div>
+                <input type="hidden" id="recurringEditId">
+                <button class="btn-primary" id="btnSaveRecurring">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Widget Config Modal -->
+    <div class="modal-overlay" id="widgetConfigModal">
+        <div class="modal">
+            <div class="modal-header"><h2>Customize Dashboard</h2><button class="modal-close" id="closeWidgetConfig"><span class="material-icons-round">close</span></button></div>
+            <div class="modal-body">
+                <p class="text-muted" style="font-size:13px;margin-bottom:12px">Drag to reorder. Toggle to show/hide widgets.</p>
+                <div id="widgetConfigList" class="widget-config-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Lightbox -->
+    <div class="lightbox-overlay" id="imageLightbox">
+        <button class="lightbox-close" id="closeLightbox"><span class="material-icons-round">close</span></button>
+        <img id="lightboxImage" class="lightbox-image" src="" alt="Preview">
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal modal-confirm">
+            <div class="modal-header"><h2>Confirm Delete</h2></div>
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure you want to delete this item?</p>
+                <div class="confirm-actions">
+                    <button class="btn-secondary" id="btnCancelDelete">Cancel</button>
+                    <button class="btn-danger" id="btnConfirmDelete">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-container">
+            <div class="search-header">
+                <span class="material-icons-round">search</span>
+                <input type="text" id="searchInput" placeholder="Search everything..." autocomplete="off">
+                <button class="search-close-btn" id="searchClose"><span class="material-icons-round">close</span></button>
+            </div>
+            <div class="search-results" id="searchResults">
+                <p class="search-hint">Type to search across all your data...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Splitter Group Modal -->
+    <div class="modal-overlay" id="splitterGroupModal">
+        <div class="modal">
+            <div class="modal-header"><h2>New Split Group</h2><button class="modal-close" data-close="splitterGroupModal"><span class="material-icons-round">close</span></button></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Group Name</label><input type="text" id="splitterGroupName" placeholder="e.g. Weekend Trip"></div>
+                <div class="form-group"><label>Members (comma-separated)</label><input type="text" id="splitterMembers" placeholder="You, Alice, Bob"></div>
+                <input type="hidden" id="splitterEditId">
+                <button class="btn-primary" onclick="Splitter.saveGroup()">Create Group</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Splitter Expense Modal -->
+    <div class="modal-overlay" id="splitterExpenseModal">
+        <div class="modal">
+            <div class="modal-header"><h2>Add Split Expense</h2><button class="modal-close" data-close="splitterExpenseModal"><span class="material-icons-round">close</span></button></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Description</label><input type="text" id="splitterExpDesc" placeholder="Dinner, Uber, etc."></div>
+                <div class="form-group"><label>Amount (₹)</label><input type="number" id="splitterExpAmount" placeholder="0" min="0"></div>
+                <div class="form-group"><label>Paid By</label><select id="splitterPaidBy"></select></div>
+                <input type="hidden" id="splitterExpGroupId">
+                <button class="btn-primary" onclick="Splitter.saveExpense()">Add Expense</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/tasks.js"></script>
+    <script src="js/messages.js"></script>
+    <script src="js/expenses.js"></script>
+    <script src="js/reminders.js"></script>
+    <script src="js/habits.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/backup.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/notes.js"></script>
+    <script src="js/goals.js"></script>
+    <script src="js/pomodoro.js"></script>
+    <script src="js/wishlist.js"></script>
+    <script src="js/income.js"></script>
+    <script src="js/contacts.js"></script>
+    <script src="js/learning.js"></script>
+    <script src="js/health.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/budget.js"></script>
+    <script src="js/recurring.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/tags.js"></script>
+    <script src="js/reports.js"></script>
+    <script src="js/widgets.js"></script>
+    <script src="js/themes.js"></script>
+    <script src="js/attachments.js"></script>
+    <script src="js/voice.js"></script>
+    <script src="js/cloudsync.js"></script>
+    <script src="js/insights.js"></script>
+    <script src="js/kanban.js"></script>
+    <script src="js/quicklog.js"></script>
+    <script src="js/weeklyplanner.js"></script>
+    <script src="js/savings.js"></script>
+    <script src="js/linking.js"></script>
+    <script src="js/location.js"></script>
+    <script src="js/receipt.js"></script>
+    <script src="js/splitter.js"></script>
+    <script src="js/dailyfocus.js"></script>
+    <script src="js/moodtrends.js"></script>
+    <script src="js/shortcuts.js"></script>
+    <script src="js/onboarding.js"></script>
+    <script src="js/greeting.js"></script>
+    <script src="js/weeklysummary.js"></script>
+    <script src="js/presets.js"></script>
+    <script src="js/swipe.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+        // Color picker binding
+        document.querySelectorAll('input[name="habitColorRadio"]').forEach(r => {
+            r.addEventListener('change', () => {
+                document.getElementById('habitColor').value = r.value;
+            });
+        });
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>
